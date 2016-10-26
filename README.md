@@ -1,12 +1,13 @@
 Thunderstorm with LED diodes and ESP8266
----
+===
 
 This repository contains source code for a little project to create a thunderstorm using cotton wool clouds, LED strip and ESP8266 microcontroller.
 
-INSTALLATION
-===
+Installation
+---
 
 1) get [webrepl](https://github.com/micropython/webrepl)
+
 2) create `config.py` with following structure
 
 ```
@@ -24,4 +25,5 @@ NEOPIXEL_COUNT = 30  # number of LEDs on the NeoPixel strip
 ```
 
 4) reboot the ESP
+
 5) enjoy!
