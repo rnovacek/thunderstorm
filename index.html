@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Thunderstorm Control App</title>
+    </head>
+    <body>
+        {{ buttons }}
+        <div>Status: <span id="status">waiting</div>
+        <script type="text/javascript">
+function set_status(text) {
+    var status = document.querySelector("#status");
+    status.innerText = text;
+}
+
+Array.prototype.forEach.call(document.querySelectorAll('button'), function (button) {
+    button.addEventListener('click', function (event) {
+        set_status("running");
+        send(event.target.dataset.command);
+    });
+});
+
+function send(path) {
+    var req = new XMLHttpRequest();
+    req.addEventListener("load", function () {
+        set_status("done");
+    });
+    req.addEventListener("error", function () {
+        set_status("error");
+    });
+    req.open("POST", '/' + path);
+    req.send();
+}
+        </script>
+    </body>
+</html>
