@@ -18,12 +18,24 @@ NEOPIXEL_PIN = 5  # pin of ESP where is the NeoPixel strip connected
 NEOPIXEL_COUNT = 30  # number of LEDs on the NeoPixel strip
 ```
 
-3) upload files to ESP8266 with Micropython preloaded
+3) install requirements (you may want to use virtualenv), specifically you'll need `mpfshell` command
 
 ```
-/path/to/webrepl/webrepl_cli.py main.py webapp.py config.py index.html <ip_of_esp>:
+pip install requirements.txt
 ```
 
-4) reboot the ESP
+4) connect ESP8266, [download](https://micropython.org/download#esp8266) and [install](https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html#deploying-the-firmware) MicroPython to it (if you don't have it already)
 
-5) enjoy!
+5) check ESP8266 port and if it's different from `/dev/ttyUSB0`, change it in `upload.mpf` file
+
+6) upload files to ESP8266 using `mpfshell`
+
+```
+mpfshell -s upload.mpf
+```
+
+7) reboot the ESP
+
+8) connect to IP address of the ESP from your browser and select mode
+
+9) enjoy!

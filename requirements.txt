@@ -1,0 +1,4 @@
+pyserial
+colorama
+websocket_client
+git+https://github.com/wendlers/mpfshell

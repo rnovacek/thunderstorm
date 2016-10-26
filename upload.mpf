@@ -1,0 +1,5 @@
+open ttyUSB0
+put main.py
+put webapp.py
+put config.py
+put index.html
