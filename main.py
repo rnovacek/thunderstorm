@@ -24,9 +24,10 @@ if not hasattr(time, 'sleep_ms'):
 try:
     import config
 except ImportError:
-    print("Create config not found, see README")
+    print("Config not found, see README for instructions how to create one")
     sys.exit(1)
-    
+
+
 def connect():
     wlan = network.WLAN(network.STA_IF)
     wlan.active(True)
