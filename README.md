@@ -6,9 +6,7 @@ This repository contains source code for a little project to create a thundersto
 Installation
 ---
 
-1) get [webrepl](https://github.com/micropython/webrepl)
-
-2) create `config.py` with following structure
+1) create `config.py` with following structure
 
 ```
 USE_AP = False  # set to True to connect to external network, default AP from ESP will be used if False
@@ -18,24 +16,24 @@ NEOPIXEL_PIN = 5  # pin of ESP where is the NeoPixel strip connected
 NEOPIXEL_COUNT = 30  # number of LEDs on the NeoPixel strip
 ```
 
-3) install requirements (you may want to use virtualenv), specifically you'll need `mpfshell` command
+2) install requirements (you may want to use virtualenv), specifically you'll need `mpfshell` command
 
 ```
 pip install requirements.txt
 ```
 
-4) connect ESP8266, [download](https://micropython.org/download#esp8266) and [install](https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html#deploying-the-firmware) MicroPython to it (if you don't have it already)
+3) connect ESP8266, [download](https://micropython.org/download#esp8266) and [install](https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html#deploying-the-firmware) MicroPython to it (if you don't have it already)
 
-5) check ESP8266 port and if it's different from `/dev/ttyUSB0`, change it in `upload.mpf` file
+4) check ESP8266 port and if it's different from `/dev/ttyUSB0`, change it in `upload.mpf` file
 
-6) upload files to ESP8266 using `mpfshell`
+5) upload files to ESP8266 using `mpfshell`
 
 ```
 mpfshell -s upload.mpf
 ```
 
-7) reboot the ESP
+6) reboot the ESP
 
-8) connect to IP address of the ESP from your browser and select mode
+7) connect to IP address of the ESP from your browser and select mode
 
-9) enjoy!
+8) enjoy!
