@@ -11,7 +11,7 @@ if not is_embedded:
     # use fake libraries to simulate ESP
     sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), 'fakeesp'))
 
-    
+
 from neopixel import NeoPixel
 from machine import Pin
 import network
@@ -90,9 +90,57 @@ def lightning():
         time.sleep_ms(1)
     off()
 
+@WebApp.register('rainbow')
+def rainbow():
+    changing_color = [255, 0, 0]
+    while True:
+        while True:
+            changing_color[2] += 1
+            changing_color[0] -= 1
+            for i in range(count):
+                np[i] = changing_color
+            np.write()
+            if changing_color[2] == 255:
+                break
+        while True:
+            changing_color[1] += 1
+            changing_color[2] -= 1
+            for i in range(count):
+                np[i] = changing_color
+            np.write()
+            if changing_color[1] == 255:
+                break
+        while True:
+            changing_color[0] += 1
+            changing_color[1] -= 1
+            for i in range(count):
+                np[i] = changing_color
+            np.write()
+            if changing_color[0] == 255:
+                break
+
+        '''
+        while np[i][2] <= 255:
+            np[i] = (np[i][0]-1, 0, np[i][2]+1)
+            time.sleep_ms(20)
+            np.write()
+        while np[i][1] <= 255:
+            for i in range(count):
+                np[i] = (0, np[i][1]+1, np[i][2]-1)
+                time.sleep_ms(20)
+                np.write()
+        while np[i][0] <= 255:
+            for i in range(count):
+                np[i] = (np[i][0]+1, np[i][1]-1, 0)
+                time.sleep_ms(20)
+                np.write()
+        '''
+
+
+
+
 if __name__ == '__main__':
     if config.USE_AP:
         connect()
     lightning()
     WebApp().start()
-
