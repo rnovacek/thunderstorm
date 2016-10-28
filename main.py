@@ -29,9 +29,7 @@ except ImportError:
 
 
 def connect():
-    mode = network.STA_IF if config.USE_AP else network.AP_IF
-
-    wlan = network.WLAN(mode)
+    wlan = network.WLAN(network.STA_IF if config.USE_AP else network.AP_IF)
     wlan.active(True)
     if config.USE_AP and not wlan.isconnected():
         print('connecting to network...')
@@ -76,11 +74,28 @@ def green():
 
 
 @WebApp.register('blue')
-def green():
+def blue():
     for i in range(count):
         np[i] = (0, 0, 255)
     np.write()
 
+@WebApp.register('yellow')
+def yellow():
+    for i in range(count):
+        np[i] = (255, 255, 0)
+    np.write()
+    
+@WebApp.register('fuchsia')
+def fuchsia():
+    for i in range(count):
+        np[i] = (255, 0, 255)
+    np.write()
+
+@WebApp.register('white')
+def white():
+    for i in range(count):
+        np[i] = (255, 255, 255)
+    np.write()
 
 def gauss(a, b, c, x):
     return a * math.exp(-((x - b) ** 2.0) / (2 * (c ** 2.0)))
@@ -132,27 +147,20 @@ def rainbow():
             if changing_color[0] == 255:
                 break
 
-        '''
-        while np[i][2] <= 255:
-            np[i] = (np[i][0]-1, 0, np[i][2]+1)
-            time.sleep_ms(20)
-            np.write()
-        while np[i][1] <= 255:
-            for i in range(count):
-                np[i] = (0, np[i][1]+1, np[i][2]-1)
-                time.sleep_ms(20)
-                np.write()
-        while np[i][0] <= 255:
-            for i in range(count):
-                np[i] = (np[i][0]+1, np[i][1]-1, 0)
-                time.sleep_ms(20)
-                np.write()
-        '''
+@WebApp.register('blik')
+def blik():
+    while True:
+        for color in [red, blue, green]:
+            color()
+            yield 2000
 
-
-
+def run(func):
+    result = func()
+    for wait in result:
+        time.sleep_ms(wait)
+        
 
 if __name__ == '__main__':
     connect()
-    lightning()
+    run(lightning)
     WebApp().start()

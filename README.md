@@ -19,7 +19,7 @@ NEOPIXEL_COUNT = 30  # number of LEDs on the NeoPixel strip
 2) install requirements (you may want to use virtualenv), specifically you'll need `mpfshell` command
 
 ```
-pip install requirements.txt
+pip3 install -r requirements.txt
 ```
 
 3) connect ESP8266, [download](https://micropython.org/download#esp8266) and [install](https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html#deploying-the-firmware) MicroPython to it (if you don't have it already)
