@@ -49,6 +49,11 @@ count = config.NEOPIXEL_COUNT
 np = NeoPixel(pin, count)
 
 
+@WebApp.register('stop')
+def stop():
+    pass
+
+
 @WebApp.register('off')
 def off():
     for i in range(count):
