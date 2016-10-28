@@ -29,9 +29,11 @@ except ImportError:
 
 
 def connect():
-    wlan = network.WLAN(network.STA_IF)
+    mode = network.STA_IF if config.USE_AP else network.AP_IF
+
+    wlan = network.WLAN(mode)
     wlan.active(True)
-    if not wlan.isconnected():
+    if config.USE_AP and not wlan.isconnected():
         print('connecting to network...')
         wlan.connect(config.SSID, config.PASSWORD)
         while not wlan.isconnected():
@@ -140,7 +142,6 @@ def rainbow():
 
 
 if __name__ == '__main__':
-    if config.USE_AP:
-        connect()
+    connect()
     lightning()
     WebApp().start()

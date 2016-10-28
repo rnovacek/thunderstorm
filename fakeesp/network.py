@@ -4,6 +4,7 @@ Placeholder file to simulate ESP8266 Micropython API on computer, do NOT install
 
 
 STA_IF = 1
+AP_IF = 2
 
 
 class WLAN:
