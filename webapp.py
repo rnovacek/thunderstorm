@@ -31,7 +31,7 @@ class WebApp(object):
             with open(filename, 'r', encoding='utf-8') as f:
                 data = f.read()
             buttons = []
-            for command in WebApp.commands:
+            for command in sorted(WebApp.commands):
                 buttons.append('<button data-command="{}">{}</button>'.format(command, command))
             data = data.replace("{{ buttons }}", ''.join(buttons)).encode('utf-8')
         elif not data:
