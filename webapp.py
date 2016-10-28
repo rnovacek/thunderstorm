@@ -3,6 +3,7 @@ import sys
 import socket
 import gc
 
+import time
 
 CODE_STRINGS = {
     200: 'OK',
@@ -54,6 +55,7 @@ class WebApp(object):
     def register(cls, label):
         def outer(func):
             cls.commands[label] = func
+
             def inner(*args, **kwargs):
                 return func(*args, **kwargs)
             return inner
@@ -69,31 +71,54 @@ class WebApp(object):
 
         print('listening on', addr)
 
+        cl = None
         while True:
-            cl, addr = s.accept()
-            print('client connected from', addr)
-            cl_file = cl.makefile('rwb', 0)
-            first_line = cl_file.readline().decode('ascii')
-            while True:
-                line = cl_file.readline()
-                if not line or line == b'\r\n':
-                    break
-            print(first_line)
-            method, path, protocol = first_line.split(' ')
-            if method.lower() == 'get':
-                if path == '/':
-                    self.send(cl, 200, filename='index.html', content_type='text/html; charset=utf-8')
-                else:
-                    self.send(cl, 404)
-            elif method.lower() == 'post':
-                try:
-                    func = WebApp.commands[path.lstrip('/')]
-                except KeyError:
-                    self.send(cl, 404)
-                    return
-                func()
-                self.send(cl, 200)
+            s.setblocking(True)
+            if cl is None:
+                cl, addr = s.accept()
+            func = self.process_input(s, cl, addr)
+            cl = None
+            if not func:
+                continue
 
-            #mem = gc.mem_alloc()
-            #gc.collect()
-            #print("Freeing", mem - gc.mem_alloc(), "now free", gc.mem_free())
+            result = func()
+            if not result:
+                continue
+
+            # We got a generator
+            s.setblocking(False)
+            for wait in result:
+                try:
+                    cl, addr = s.accept()
+                    break
+                except BlockingIOError:
+                    pass
+                time.sleep_ms(wait)
+
+    def process_input(self, s, cl, addr):
+        print('client connected from', addr)
+        cl_file = cl.makefile('rwb', 0)
+        first_line = cl_file.readline().decode('ascii')
+        while True:
+            line = cl_file.readline()
+            if not line or line == b'\r\n':
+                break
+        print(first_line)
+        method, path, protocol = first_line.split(' ')
+        if method.lower() == 'get':
+            if path == '/':
+                self.send(cl, 200, filename='index.html', content_type='text/html; charset=utf-8')
+            else:
+                self.send(cl, 404)
+        elif method.lower() == 'post':
+            try:
+                func = WebApp.commands[path.lstrip('/')]
+            except KeyError:
+                self.send(cl, 404)
+                return
+            self.send(cl, 200)
+            return func
+
+        #mem = gc.mem_alloc()
+        #gc.collect()
+        #print("Freeing", mem - gc.mem_alloc(), "now free", gc.mem_free())

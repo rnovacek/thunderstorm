@@ -69,6 +69,7 @@ def green():
         np[i] = (0, 255, 0)
     np.write()
 
+
 @WebApp.register('blue')
 def green():
     for i in range(count):
@@ -78,6 +79,7 @@ def green():
 
 def gauss(a, b, c, x):
     return a * math.exp(-((x - b) ** 2.0) / (2 * (c ** 2.0)))
+
 
 @WebApp.register('lightning')
 def lightning():
@@ -89,8 +91,9 @@ def lightning():
         for j in range(count):
             np[j] = (v, v, v)
         np.write()
-        time.sleep_ms(1)
+        yield 1
     off()
+
 
 @WebApp.register('rainbow')
 def rainbow():
@@ -102,6 +105,7 @@ def rainbow():
             for i in range(count):
                 np[i] = changing_color
             np.write()
+            yield 1
             if changing_color[2] == 255:
                 break
         while True:
@@ -110,6 +114,7 @@ def rainbow():
             for i in range(count):
                 np[i] = changing_color
             np.write()
+            yield 1
             if changing_color[1] == 255:
                 break
         while True:
@@ -118,6 +123,7 @@ def rainbow():
             for i in range(count):
                 np[i] = changing_color
             np.write()
+            yield 1
             if changing_color[0] == 255:
                 break
 
