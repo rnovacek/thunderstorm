@@ -29,14 +29,20 @@ except ImportError:
 
 
 def connect():
-    wlan = network.WLAN(network.STA_IF if config.USE_AP else network.AP_IF)
-    wlan.active(True)
-    if config.USE_AP and not wlan.isconnected():
+    ap_if = network.WLAN(network.AP_IF)
+    ap_if.active(True)
+
+    if config.USE_AP:
+        sta_if = network.WLAN(network.STA_IF)
+        sta_if.active(True)
+
         print('connecting to network...')
-        wlan.connect(config.SSID, config.PASSWORD)
-        while not wlan.isconnected():
+        start_time = time.time()
+        sta_if.connect(config.SSID, config.PASSWORD)
+        while not sta_if.isconnected() and time.time() - start_time < 3.0:
             pass
-    print('network config:', wlan.ifconfig())
+        print('network config:', sta_if.ifconfig())
+    print('AP network config:', ap_if.ifconfig())
 
 if is_embedded:
     import webrepl
