@@ -33,12 +33,9 @@ class WebApp(object):
 
     def send(self, cl, code, data=None, filename=None, content_type=None):
         if filename:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, 'rb') as f:
+                # FIXME: use chunks
                 data = f.read()
-            buttons = []
-            for command in sorted(WebApp.commands):
-                buttons.append('<button data-command="{}">{}</button>'.format(command, command))
-            data = data.replace("{{ buttons }}", ''.join(buttons)).encode('utf-8')
         elif not data:
             data = b''
         else:
@@ -120,6 +117,9 @@ class WebApp(object):
         if method.lower() == b'get':
             if path == b'/':
                 self.send(cl, 200, filename='index.html', content_type='text/html; charset=utf-8')
+            elif path == b'/commands':
+                commands = ', '.join('"' + c + '"' for c in sorted(WebApp.commands))
+                self.send(cl, 200, '[' + commands + ']', content_type='application/json')
             else:
                 self.send(cl, 404)
         elif method.lower() == b'post':
