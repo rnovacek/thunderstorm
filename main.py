@@ -3,6 +3,26 @@ import sys
 import time
 import math
 
+try:
+    from random import randrange, random, choice
+except ImportError:
+    from uos import urandom
+
+    def random():
+        n = urandom(4)
+        return (n[0] + n[1] * 256 + n[2] * 256 * 256 + n[3] * 256 * 256 * 256) / (256 ** 4)
+
+    def randrange(start, stop=None):
+        if stop is None:
+            stop = start
+            start = 0
+
+        return int(start + (stop - start) * random())
+
+    def choice(seq):
+        return seq[int(random() * len(seq))]
+
+
 from webapp import WebApp
 
 is_embedded = sys.platform == 'esp8266'
@@ -111,14 +131,47 @@ def gauss(a, b, c, x):
 def lightning():
     i = 0
     increment = 0.5
+
+    colors = []
     while i < 12:
         i += increment
-        v = max(0, int(255 * (gauss(1.0, 2.0, 1.25, i) + gauss(0.75, 7.0, 1.25, i) + gauss(0.5, 9.0, 1.25, i))))
+        v = _lightning(1.0, 2.0, i) + _lightning(0.75, 7.0, i) + _lightning(0.5, 9.0, i)
+        colors.append((v, v, v))
+
+    for color in colors:
         for j in range(count):
-            np[j] = (v, v, v)
+            np[j] = color
         np.write()
-        yield 1
+        yield 10
     off()
+
+
+def _lightning(amplitude, offset, index):
+    return max(0, int(255 * (gauss(amplitude, offset, 1.25, index))))
+
+
+@WebApp.register('storm')
+def storm():
+    increment = 0.5
+    segment = config.NEOPIXEL_SEGMENTS[0]
+
+    while True:
+        i = 0
+        if choice((1, 2, 3, 4)) < 4:
+            segment = choice(config.NEOPIXEL_SEGMENTS)
+        amplitude = choice((1.0, 0.75, 0.5))
+        duration = choice((3.0, 5.0, 8.0))
+
+        while i < duration:
+            i += increment
+            v = _lightning(amplitude, 0, i)
+            for j in range(config.NEOPIXEL_COUNT):
+                if j in segment:
+                    np[j] = (v, v, v)
+                else:
+                    np[j] = (10, 10, 10)
+            np.write()
+            yield 25
 
 
 @WebApp.register('rainbow')
@@ -153,6 +206,7 @@ def rainbow():
             if changing_color[0] == 255:
                 break
 
+
 @WebApp.register('blik')
 def blik():
     while True:
@@ -168,5 +222,4 @@ def run(func):
 
 if __name__ == '__main__':
     connect()
-    run(lightning)
-    WebApp().start()
+    WebApp().start(default_func=storm)
