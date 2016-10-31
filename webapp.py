@@ -1,6 +1,11 @@
 
 import sys
-import socket
+try:
+    import usocket as socket
+except ImportError:
+    usocket = None
+    import socket
+
 import gc
 
 import time
@@ -44,12 +49,13 @@ class WebApp(object):
             'Connection: close',
             'Content-Length: {}'.format(len(data))
         ]
-        if content_type:
-            headers.append('Content-Type: {}'.format(content_type))
+
+        headers.append('Content-Type: {}'.format(content_type if content_type else 'text/plain'))
         self._send(cl, '\r\n'.join(headers).encode('ascii'))
         self._send(cl, b'\r\n\r\n')
         self._send(cl, data)
         cl.close()
+        print('Client served:', data, code)
 
     @classmethod
     def register(cls, label):
@@ -61,63 +67,71 @@ class WebApp(object):
             return inner
         return outer
 
-    def start(self):
+    def start(self, default_func=None):
         addr = socket.getaddrinfo('0.0.0.0', 80 if len(sys.argv) < 2 else sys.argv[1])[0][-1]
 
         s = socket.socket()
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind(addr)
-        s.listen(1)
+        s.listen(5)
 
         print('listening on', addr)
 
         cl = None
-        while True:
-            s.setblocking(True)
-            if cl is None:
-                cl, addr = s.accept()
-            func = self.process_input(s, cl, addr)
-            cl = None
-            if not func:
-                continue
+        func = default_func
+        result = None
 
-            result = func()
-            if not result:
-                continue
+        while True:
+            if func:
+                result = func()
+                if not result:
+                    func = None
+                    continue
 
             # We got a generator
-            s.setblocking(False)
-            for wait in result:
+            for wait in result or [0]:
+                s.settimeout(wait / 1000.0)
                 try:
                     cl, addr = s.accept()
+                    func = self.process_input(s, cl, addr) or func
                     break
-                except BlockingIOError:
+                except OSError:  # BlockingIOError
                     pass
-                time.sleep_ms(wait)
 
     def process_input(self, s, cl, addr):
         print('client connected from', addr)
-        cl_file = cl.makefile('rwb', 0)
-        first_line = cl_file.readline().decode('ascii')
+        cl.settimeout(None)
+
+        if not hasattr(cl, 'readline'):
+            # CPython
+            client_stream = cl.makefile("rwb")
+        else:
+            # MicroPython
+            client_stream = cl
+
+        req = client_stream.readline()
+        print(req)
         while True:
-            line = cl_file.readline()
-            if not line or line == b'\r\n':
+            data = client_stream.readline()
+            if not data or data == b'\r\n':
                 break
-        print(first_line)
-        method, path, protocol = first_line.split(' ')
-        if method.lower() == 'get':
-            if path == '/':
+
+        method, path, protocol = req.split(b' ')
+        if method.lower() == b'get':
+            if path == b'/':
                 self.send(cl, 200, filename='index.html', content_type='text/html; charset=utf-8')
             else:
                 self.send(cl, 404)
-        elif method.lower() == 'post':
+        elif method.lower() == b'post':
             try:
-                func = WebApp.commands[path.lstrip('/')]
+                func = WebApp.commands[path.lstrip(b'/').decode('ascii')]
             except KeyError:
                 self.send(cl, 404)
                 return
             self.send(cl, 200)
             return func
+        else:
+            self.send(cl, 400)
 
         #mem = gc.mem_alloc()
         #gc.collect()
